@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Staking & Referral Simulator</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-color: #1E1E1E;
+            --input-bg: #2A2A2A;
+            --border-color: #333333;
+            --cyan: #00E5FF;
+            --cyan-glow: rgba(0, 229, 255, 0.5);
+            --green: #00E676;
+            --text-main: #FFFFFF;
+            --text-muted: #9E9E9E;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .card {
+            background-color: var(--card-color);
+            width: 100%;
+            max-width: 440px;
+            border-radius: 20px;
+            padding: 32px 24px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 20px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.9;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        input {
+            width: 100%;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            font-size: 1rem;
+            padding: 14px 16px;
+            border-radius: 12px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.15);
+        }
+
+        input::placeholder {
+            color: #666;
+        }
+
+        .btn-calc {
+            width: 100%;
+            background-color: transparent;
+            color: var(--cyan);
+            border: 1.5px solid var(--cyan);
+            padding: 14px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 8px;
+            margin-bottom: 24px;
+        }
+
+        .btn-calc:hover {
+            background-color: rgba(0, 229, 255, 0.05);
+        }
+
+        .btn-calc:active {
+            transform: scale(0.98);
+        }
+
+        .output-label {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .cyan-output {
+            color: var(--cyan);
+            font-size: 2.2rem;
+            font-weight: 800;
+            text-align: center;
+            margin: 8px 0 0 0;
+            line-height: 1.2;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: var(--border-color);
+            border: none;
+            margin: 32px 0;
+        }
+
+        .green-output {
+            color: var(--green);
+            font-size: 2.8rem;
+            font-weight: 900;
+            text-align: center;
+            margin: 8px 0 32px 0;
+            line-height: 1.1;
+        }
+
+        .btn-cta {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--cyan);
+            color: var(--bg-color);
+            text-decoration: none;
+            padding: 18px;
+            border-radius: 14px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            box-shadow: 0 0 20px var(--cyan-glow);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-cta:hover {
+            box-shadow: 0 0 30px var(--cyan);
+            transform: translateY(-2px);
+        }
+
+        .btn-cta:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .btn-cta span {
+            font-size: 0.8rem;
+            font-weight: 600;
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+
+        /* Subtle flash animation for data passing */
+        @keyframes pulseBorder {
+            0% { border-color: var(--border-color); box-shadow: none; }
+            50% { border-color: var(--cyan); box-shadow: 0 0 15px var(--cyan-glow); }
+            100% { border-color: var(--border-color); box-shadow: none; }
+        }
+        .flash-update {
+            animation: pulseBorder 0.8s ease-out;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="section-title">Basic Staking Yield</div>
+        
+        <div class="input-group">
+            <label for="invAmount">Investment Amount (USD)</label>
+            <input type="number" id="invAmount" placeholder="e.g., 5000" min="0" step="any">
+        </div>
+
+        <div class="input-group">
+            <label for="apyPercent">Estimated APY (%)</label>
+            <input type="number" id="apyPercent" placeholder="e.g., 12.5" min="0" step="any">
+        </div>
+
+        <button class="btn-calc" id="btnCalcStaking">Calculate Staking Yield</button>
+
+        <div class="output-label">Projected 30-Day Profit (USD)</div>
+        <div class="cyan-output" id="out30DayProfit">$0.00</div>
+
+        <hr class="divider">
+
+        <div class="section-title">Referral Bonus Multiplier</div>
+
+        <div class="input-group">
+            <label for="stkProfitPassed">Staking Profit to Multiply (USD)</label>
+            <input type="number" id="stkProfitPassed" placeholder="Auto-populated from above" min="0" step="any">
+        </div>
+
+        <div class="input-group">
+            <label for="numReferrals">Number of Active Referrals</label>
+            <input type="number" id="numReferrals" placeholder="e.g., 5" min="0" step="1">
+        </div>
+
+        <button class="btn-calc" id="btnCalcTotal">Calculate Total Income</button>
+
+        <div class="output-label">Total Potential Monthly Income (USD)</div>
+        <div class="green-output" id="outTotalIncome">$0.00</div>
+
+        <a href="https://www.binance.com/referral/earn-together/refer2earn-usdc/claim?hl=en&ref=GRO_28502_12J3C&utm_source=referral_entrance" class="btn-cta">
+            Claim These Rates
+            <span>(Limited Offer)</span>
+        </a>
+    </div>
+
+    <script>
+        // DOM Elements - Calculator 1
+        const invAmount = document.getElementById('invAmount');
+        const apyPercent = document.getElementById('apyPercent');
+        const btnCalcStaking = document.getElementById('btnCalcStaking');
+        const out30DayProfit = document.getElementById('out30DayProfit');
+
+        // DOM Elements - Calculator 2
+        const stkProfitPassed = document.getElementById('stkProfitPassed');
+        const numReferrals = document.getElementById('numReferrals');
+        const btnCalcTotal = document.getElementById('btnCalcTotal');
+        const outTotalIncome = document.getElementById('outTotalIncome');
+
+        // Currency Formatter
+        const formatCurrency = (value) => {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(value);
+        };
+
+        // Logic 1: Staking Yield
+        btnCalcStaking.addEventListener('click', () => {
+            const amount = parseFloat(invAmount.value) || 0;
+            const apy = parseFloat(apyPercent.value) || 0;
+
+            // Projected 30-Day Profit = Amount * (APY/100) * (30/365)
+            const profit = amount * (apy / 100) * (30 / 365);
+            
+            // Update UI Output
+            out30DayProfit.textContent = formatCurrency(profit);
+
+            // SMART DATA PASSING: Auto-populate Calculator 2 input
+            const formattedProfit = profit.toFixed(2);
+            stkProfitPassed.value = formattedProfit;
+
+            // Trigger visual feedback cue for the user
+            stkProfitPassed.classList.remove('flash-update');
+            void stkProfitPassed.offsetWidth; // Trigger reflow
+            stkProfitPassed.classList.add('flash-update');
+
+            // Optionally auto-calculate the bottom tier if referrals already exist
+            if(numReferrals.value !== '') {
+                calculateTotalIncome();
+            }
+        });
+
+        // Logic 2: Referral Bonus Multiplier
+        const calculateTotalIncome = () => {
+            const userProfit = parseFloat(stkProfitPassed.value) || 0;
+            const refs = parseInt(numReferrals.value) || 0;
+
+            // Total Monthly Income = User Profit + (User Profit * 0.10 * Num Referrals)
+            const referralBonus = userProfit * 0.10 * refs;
+            const totalIncome = userProfit + referralBonus;
+
+            // Update UI Output
+            outTotalIncome.textContent = formatCurrency(totalIncome);
+        };
+
+        btnCalcTotal.addEventListener('click', calculateTotalIncome);
+    </script>
+</body>
+</html>
